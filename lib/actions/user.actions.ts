@@ -3,9 +3,10 @@
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
-import { parseStringfy } from "../utils";
+import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
+import { redirect } from "next/navigation";
 
 const getUserByEmail = async (email: string) => {
 	const { databases } = await createAdminClient();
@@ -58,7 +59,7 @@ export const createAccount = async ({
 			},
 		);
 	}
-	return parseStringfy({ accountId });
+	return parseStringify({ accountId });
 };
 
 export const verifySecret = async ({
@@ -74,7 +75,7 @@ export const verifySecret = async ({
 			sameSite: "strict",
 			path: "/",
 		});
-		return parseStringfy({ sessionId: session.$id });
+		return parseStringify({ sessionId: session.$id });
 	} catch (error) {
 		handleError(error, "Failed to verify OTP");
 	}
@@ -91,5 +92,30 @@ export const getCurrentUser = async () => {
 	);
 
 	if (user.total <= 0) return null;
-	return parseStringfy(user.documents[0]);
+	return parseStringify(user.documents[0]);
+};
+
+export const signOutUser = async () => {
+	const { account } = await createSessionClient();
+	try {
+		account.deleteSession("current");
+		(await cookies()).delete("appwrite-session");
+	} catch (error) {
+		handleError(error, "Failed to sign out user");
+	} finally {
+		redirect("/sign-in");
+	}
+};
+
+export const signInUser = async ({ email }: { email: string }) => {
+	try {
+		const user = await getUserByEmail(email);
+		if (user) {
+			await sendEmailOTP({ email });
+			return parseStringify({ accountId: user.accountId });
+		}
+		return parseStringify({ accountId: null, error: "User not found" });
+	} catch (error) {
+		handleError(error, "Failed to sign in user");
+	}
 };
