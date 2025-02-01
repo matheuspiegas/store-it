@@ -82,17 +82,21 @@ export const verifySecret = async ({
 };
 
 export const getCurrentUser = async () => {
-	const { databases, account } = await createSessionClient();
-	const result = await account.get();
-	const user = await databases.listDocuments(
-		//@ts-ignore
-		appwriteConfig.databaseId,
-		appwriteConfig.usersCollectionId,
-		[Query.equal("accountId", [result.$id])],
-	);
+	try {
+		const { databases, account } = await createSessionClient();
+		const result = await account.get();
+		const user = await databases.listDocuments(
+			//@ts-ignore
+			appwriteConfig.databaseId,
+			appwriteConfig.usersCollectionId,
+			[Query.equal("accountId", [result.$id])],
+		);
 
-	if (user.total <= 0) return null;
-	return parseStringify(user.documents[0]);
+		if (user.total <= 0) return null;
+		return parseStringify(user.documents[0]);
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 export const signOutUser = async () => {

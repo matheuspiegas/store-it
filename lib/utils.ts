@@ -11,17 +11,18 @@ export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 
 export const convertFileSize = (sizeInBytes: number, digits?: number) => {
 	if (sizeInBytes < 1024) {
-		return sizeInBytes + " Bytes"; // Less than 1 KB, show in Bytes
-	} else if (sizeInBytes < 1024 * 1024) {
-		const sizeInKB = sizeInBytes / 1024;
-		return sizeInKB.toFixed(digits || 1) + " KB"; // Less than 1 MB, show in KB
-	} else if (sizeInBytes < 1024 * 1024 * 1024) {
-		const sizeInMB = sizeInBytes / (1024 * 1024);
-		return sizeInMB.toFixed(digits || 1) + " MB"; // Less than 1 GB, show in MB
-	} else {
-		const sizeInGB = sizeInBytes / (1024 * 1024 * 1024);
-		return sizeInGB.toFixed(digits || 1) + " GB"; // 1 GB or more, show in GB
+		return `${sizeInBytes} Bytes`; // Less than 1 KB, show in Bytes
 	}
+	if (sizeInBytes < 1024 * 1024) {
+		const sizeInKB = sizeInBytes / 1024;
+		return `${sizeInKB.toFixed(digits || 1)} KB`; // Less than 1 MB, show in KB
+	}
+	if (sizeInBytes < 1024 * 1024 * 1024) {
+		const sizeInMB = sizeInBytes / (1024 * 1024);
+		return `${sizeInMB.toFixed(digits || 1)} MB`; // Less than 1 GB, show in MB
+	}
+	const sizeInGB = sizeInBytes / (1024 * 1024 * 1024);
+	return `${sizeInGB.toFixed(digits || 1)} GB`; // 1 GB or more, show in GB
 };
 
 export const calculatePercentage = (sizeInBytes: number) => {
@@ -183,6 +184,7 @@ export const constructDownloadUrl = (bucketFileId: string) => {
 };
 
 // DASHBOARD UTILS
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const getUsageSummary = (totalSpace: any) => {
 	return [
 		{
